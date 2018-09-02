@@ -1,0 +1,17 @@
+# Name: dynamic-admission-controllers
+# Description: Enables ValidatingAdmissionWebhook & MutatingAdmissionWebhook
+# Url: https://docs.openshift.com/container-platform/latest/architecture/additional_concepts/dynamic_admission_controllers.html
+# OpenShift-Version: >=3.10.0
+
+echo Enalble required addmission configs
+
+ssh sudo echo 's/"admissionConfig":{"pluginConfig":null}/"admissionConfig": {"pluginConfig": {"ValidatingAdmissionWebhook": {"configuration": {"apiVersion": "v1", "kind": "DefaultAdmissionConfig", "disable": false}}, "MutatingAdmissionWebhook": { "configuration": { "apiVersion": "v1", "kind": "DefaultAdmissionConfig", "disable": false }}}}/' > master-config.sed
+ssh sudo sed -i -f master-config.sed /var/lib/minishift/base/kube-apiserver/master-config.yaml
+
+echo Restart kube-api
+docker stop $(docker ps -l -q --filter "label=io.kubernetes.container.name=api")
+
+ssh until curl -f -k https://#{ip}:8443/healthz;do sleep 1;done
+
+sleep 10
+

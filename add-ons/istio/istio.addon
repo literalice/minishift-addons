@@ -1,37 +1,45 @@
 # Name: istio
 # Description: Deploys Latest Istio
 # Url: https://github.com/istio/istio
-# Required-Vars: ISTIO_HOME
-# OpenShift-Version: >=3.7.0
-
+# OpenShift-Version: >=3.10.0
+# Depends-On: dynamic-admission-controllers
 # From istio doc
+
+# TODO https://github.com/istio/istio/issues/4500
+echo Disable SELinux (https://github.com/istio/istio/issues/4500)
+ssh sudo setenforce 0
+
+echo Apply required scc
 oc adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
-oc adm policy add-scc-to-user anyuid -z istio-egress-service-account -n istio-system
-oc adm policy add-scc-to-user anyuid -z istio-pilot-service-account -n istio-system
 oc adm policy add-scc-to-user anyuid -z default -n istio-system
+oc adm policy add-scc-to-user anyuid -z prometheus -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-egressgateway-service-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-citadel-service-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-ingressgateway-service-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-cleanup-old-ca-service-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-mixer-post-install-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-mixer-service-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-pilot-service-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-sidecar-injector-service-account -n istio-system
+oc adm policy add-cluster-role-to-user cluster-admin -z istio-galley-service-account -n istio-system
 
-# Create Istio 
-oc create -f #{ISTIO_HOME}/install/kubernetes/istio.yaml
+echo Install istio
+!oc new-project istio-system
 
-oc expose svc istio-ingress -n istio-system
+oc apply -f templates/crds.yml
+sleep 10
+oc apply -f templates/certmanager-crds.yml
+sleep 10
+oc apply -f templates/istio-1.0.1.yml
 
-# Add Istio Addons 
-oc create -f #{ISTIO_HOME}/install/kubernetes/addons/prometheus.yaml
-oc create -f #{ISTIO_HOME}/install/kubernetes/addons/grafana.yaml
-oc create -f #{ISTIO_HOME}/install/kubernetes/addons/servicegraph.yaml
-oc expose svc grafana -n istio-system
-oc expose svc servicegraph -n istio-system
-oc expose svc prometheus -n istio-system
-
-# Install Jaeger
-oc apply -f templates/jaeger-all-in-one.yml -n openshift
-oc new-app jaeger-template-all-in-one -n istio-system
-
-# Add the any uid permission to the default myproject
-oc adm policy add-scc-to-user anyuid -z default -n myproject
+echo Add the any uid permission to the default myproject
+oc adm policy add-scc-to-user privileged -z default -n default
+oc label namespace default istio-injection=enabled
 oc adm policy add-scc-to-user privileged -z default -n myproject
+oc label namespace myproject istio-injection=enabled
 
 oc project myproject
 
-echo 'Please wait for few seconds before all pods are up!'
-echo 'Watch the pods status via minishift console or oc get pods -w --all-namespaces --as system:admin'
+echo Please wait for few seconds before all pods are up!
+echo Watch the pods status via minishift console or oc get pods -w --all-namespaces --as system:admin
+
