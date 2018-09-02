@@ -13,3 +13,6 @@ docker stop $(docker ps -l -q --filter "label=io.kubernetes.container.name=api")
 
 ssh until curl -f -k https://#{ip}:8443/healthz;do sleep 1;done
 
+sleep 10;
+
+echo Dynamic admission controllers add-on successfully removed
