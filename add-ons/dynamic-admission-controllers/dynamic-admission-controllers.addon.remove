@@ -3,7 +3,7 @@
 # Url: https://docs.openshift.com/container-platform/latest/architecture/additional_concepts/dynamic_admission_controllers.html
 # OpenShift-Version: >=3.10.0
 
-echo Enalble required addmission configs
+echo Disable required admission configs
 
 ssh sudo echo 's/"admissionConfig": {"pluginConfig": {"ValidatingAdmissionWebhook": {"configuration": {"apiVersion": "v1", "kind": "DefaultAdmissionConfig", "disable": false}}, "MutatingAdmissionWebhook": { "configuration": { "apiVersion": "v1", "kind": "DefaultAdmissionConfig", "disable": false }}}}/"admissionConfig":{"pluginConfig":null}/' > master-config.sed
 ssh sudo sed -i -f master-config.sed /var/lib/minishift/base/kube-apiserver/master-config.yaml
