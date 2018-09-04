@@ -9,6 +9,9 @@
 echo Disable SELinux (https://github.com/istio/istio/issues/4500)
 ssh sudo setenforce 0
 
+echo Install istio
+!oc new-project istio-system
+
 echo Apply required scc
 oc adm policy add-scc-to-user anyuid -z istio-ingress-service-account -n istio-system
 oc adm policy add-scc-to-user anyuid -z default -n istio-system
@@ -21,10 +24,8 @@ oc adm policy add-scc-to-user anyuid -z istio-mixer-post-install-account -n isti
 oc adm policy add-scc-to-user anyuid -z istio-mixer-service-account -n istio-system
 oc adm policy add-scc-to-user anyuid -z istio-pilot-service-account -n istio-system
 oc adm policy add-scc-to-user anyuid -z istio-sidecar-injector-service-account -n istio-system
+oc adm policy add-scc-to-user anyuid -z istio-galley-service-account -n istio-system
 oc adm policy add-cluster-role-to-user cluster-admin -z istio-galley-service-account -n istio-system
-
-echo Install istio
-!oc new-project istio-system
 
 oc apply -f templates/crds.yml
 sleep 10
@@ -41,5 +42,4 @@ oc label namespace myproject istio-injection=enabled
 oc project myproject
 
 echo Please wait for few seconds before all pods are up!
-echo Watch the pods status via minishift console or oc get pods -w --all-namespaces --as system:admin
-
+echo Watch the pods status via minishift console or oc get pods -w -n istio-system --as system:admin

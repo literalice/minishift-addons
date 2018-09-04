@@ -25,4 +25,3 @@ oc delete --ignore-not-found=true -f templates/certmanager-crds.yml
 oc project myproject
 
 echo Istio add-on successfully removed
-

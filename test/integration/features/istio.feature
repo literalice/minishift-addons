@@ -1,5 +1,4 @@
 @istio
-
 Feature: Feature for istio
 
   @minishift-only
@@ -8,15 +7,21 @@ Feature: Feature for istio
      When executing "minishift addons install ../../add-ons/istio" succeeds
      Then stdout should contain "Addon 'istio' installed"
 
-  Scenario: User can apply the istio add-on
-    Given executing "minishift start" succeeds
-     When executing "minishift addons apply dynamic-admission-controllers" succeeds
-     And executing "minishift addons apply istio" succeeds
-     Then stdout should contain "Watch the pods status via minishift console or oc get pods"
-
-  Scenario: User can remove the istio add-on
-     When executing "minishift addons remove istio" succeeds
-     Then stdout should contain "Istio add-on successfully removed"
+  # Scenario: Minishift starts
+  #   Given Minishift has state "Does Not Exist"
+  #    When executing "minishift start --memory=4GB" succeeds
+  #    Then Minishift should have state "Running"
+# 
+  # Scenario: User can apply the istio add-on
+  #   Given Minishift has state "Running"
+  #    When executing "minishift addons apply dynamic-admission-controllers" succeeds
+  #     And executing "minishift addons apply istio" succeeds
+  #     And executing "oc get pods -n istio-system --as system:admin" succeeds
+  #    Then stdout should contain "istio-pilot-"
+# 
+  # Scenario: User can remove the istio add-on
+  #    When executing "minishift addons remove istio" succeeds
+  #    Then stdout should contain "Istio add-on successfully removed"
 
   Scenario: User can uninstall istio add-on
      When executing "minishift addons uninstall istio" succeeds
